@@ -10,6 +10,7 @@ import {
   useEffect,
   Fragment,
 } from "react";
+import { useDropzone } from "react-dropzone";
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -154,9 +155,27 @@ const Context = createContext<{
 });
 
 function Pane(props: { index: number; pageSetup: PageSetup }) {
+  const [files, setFiles] = useState<(File & { preview: string })[]>([]);
   const { pageSetup } = props;
   const ref = useRef<HTMLDivElement>(null);
   const { registerPane } = useContext(Context);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/*": [],
+    },
+    onDrop: useCallback((acceptedFiles) => {
+      setFiles(
+        acceptedFiles.map((file) =>
+          Object.assign(file, {
+            preview: URL.createObjectURL(file),
+          }),
+        ),
+      );
+    }, []),
+  });
+
+  // TODO: revoew object url
 
   useEffect(() => {
     const div = ref.current;
@@ -167,7 +186,7 @@ function Pane(props: { index: number; pageSetup: PageSetup }) {
 
   return (
     <div
-      className="p-2"
+      className="p-2 relative"
       ref={ref}
       style={{
         width: mmToPx(pageSetup.paneWidth()),
@@ -177,7 +196,18 @@ function Pane(props: { index: number; pageSetup: PageSetup }) {
         color: props.index % 2 === 0 ? "white" : "black",
       }}
     >
-      {props.index === 0 ? "Cover" : `Page ${props.index}`}
+      <div {...getRootProps()} className="absolute inset-0">
+        <input {...getInputProps()} />
+      </div>
+      {files.map((file) => (
+        <img
+          src={file.preview}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ))}
+      <div className="relative">
+        <span>{props.index === 0 ? "Cover" : `Page ${props.index}`}</span>
+      </div>
     </div>
   );
 }
