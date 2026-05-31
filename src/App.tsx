@@ -10,34 +10,124 @@ import {
   useEffect,
 } from "react";
 
-const LETTER_WIDTH_MM = 279.4;
-const LETTER_HEIGHT_MM = 215.9;
+async function rotate180(dataUrl: string): Promise<string> {
+  const img = new Image();
+  img.src = dataUrl;
+  await img.decode();
 
-const COLS = 4;
-const ROWS = 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
 
-const PANE_WIDTH = LETTER_WIDTH_MM / COLS;
-const PANE_HEIGHT = LETTER_HEIGHT_MM / ROWS;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not create canvas context");
 
-async function print(ctx: { images: HTMLDivElement[] }) {
+  ctx.translate(img.width, img.height);
+  ctx.rotate(Math.PI);
+  ctx.drawImage(img, 0, 0);
+
+  return canvas.toDataURL("image/png");
+}
+
+abstract class PageSetup {
+  abstract pannelCount: number;
+
+  abstract rows: number;
+  abstract cols: number;
+
+  abstract pageHeightMm: number;
+  abstract pageWidthMm: number;
+
+  abstract paneWidth(): number;
+  abstract paneHeight(): number;
+
+  abstract paneAspectRatio(): number;
+
+  abstract translatePaneIndex(index: number):
+    | {
+        index: number;
+        flip?: boolean;
+      }
+    | undefined;
+}
+
+class UsLetter implements PageSetup {
+  pannelCount = 8;
+  cols = 4;
+  rows = 2;
+  pageHeightMm = 215.9;
+  pageWidthMm = 279.4;
+
+  paneWidth() {
+    return this.pageWidthMm / this.cols;
+  }
+
+  paneHeight() {
+    return this.pageHeightMm / this.rows;
+  }
+
+  paneAspectRatio() {
+    return this.paneWidth() / this.paneHeight();
+  }
+
+  translatePaneIndex(
+    index: number,
+  ): { index: number; flip?: boolean } | undefined {
+    switch (index) {
+      case 0:
+        return { index: 5 };
+      case 1:
+        return { index: 6 };
+      case 2:
+        return { index: 7 };
+      case 3:
+        return { index: 3, flip: true };
+      case 4:
+        return { index: 2, flip: true };
+      case 5:
+        return { index: 1, flip: true };
+      case 6:
+        return { index: 0, flip: true };
+      case 7:
+        return { index: 4, flip: true };
+    }
+  }
+}
+
+async function print(ctx: { images: HTMLDivElement[]; pageSetup: PageSetup }) {
+  const pageWidthMm = ctx.pageSetup.pageWidthMm;
+  const pageHeightMm = ctx.pageSetup.pageHeightMm;
+
+  const paneWidth = ctx.pageSetup.paneWidth();
+  const paneHeight = ctx.pageSetup.paneHeight();
+
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
-    format: [LETTER_WIDTH_MM, LETTER_HEIGHT_MM],
+    format: [pageWidthMm, pageHeightMm],
   });
 
   let i = 0;
   for (const div of ctx.images) {
-    const col = i % 4;
-    const row = i >= 4 ? 1 : 0;
-    const img = await toPng(div);
+    const paneIndex = ctx.pageSetup.translatePaneIndex(i);
+    if (_.isNil(paneIndex)) {
+      continue;
+    }
+    const col = paneIndex.index % 4;
+    const row = paneIndex.index >= 4 ? 1 : 0;
+    let img = await toPng(div);
+
+    if (paneIndex.flip) {
+      img = await rotate180(img);
+    }
+
     doc.addImage(
       img,
       "png",
-      col * PANE_WIDTH,
-      row * PANE_HEIGHT,
-      PANE_WIDTH,
-      PANE_HEIGHT,
+      col * paneWidth,
+      row * paneHeight,
+      paneWidth,
+      paneHeight,
     );
     i++;
   }
@@ -51,7 +141,7 @@ const Context = createContext<{
   registerPane: _.noop,
 });
 
-function Pane(props: { index: number }) {
+function Pane(props: { index: number; pageSetup: PageSetup }) {
   const ref = useRef<HTMLDivElement>(null);
   const { registerPane } = useContext(Context);
 
@@ -67,7 +157,7 @@ function Pane(props: { index: number }) {
       className="w-50"
       ref={ref}
       style={{
-        aspectRatio: PANE_WIDTH / PANE_HEIGHT,
+        aspectRatio: props.pageSetup.paneAspectRatio(),
         backgroundColor: props.index % 2 === 0 ? "black" : "white",
         color: props.index % 2 === 0 ? "white" : "black",
       }}
@@ -77,9 +167,10 @@ function Pane(props: { index: number }) {
   );
 }
 
+const pageSetup = new UsLetter();
+
 function App() {
   const [panes, setPanes] = useState<HTMLDivElement[]>([]);
-  console.log(panes);
   const registerPane = useCallback(
     (index: number, pane: HTMLDivElement) =>
       setPanes((prev) => {
@@ -96,7 +187,7 @@ function App() {
           {Array.from({ length: 8 })
             .fill(0)
             .map((_num, index) => (
-              <Pane key={index} index={index} />
+              <Pane key={index} index={index} pageSetup={pageSetup} />
             ))}
         </div>
       </Context.Provider>
@@ -104,6 +195,7 @@ function App() {
         onClick={() =>
           print({
             images: _.compact(panes),
+            pageSetup,
           })
         }
       >
