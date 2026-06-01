@@ -6,6 +6,8 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { generateSudoku } from "../lib/sudoku";
+import { Sudoku } from "./Sudoku";
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -125,6 +127,17 @@ export function NasaPane(props: Omit<PaneProps, "children">) {
         src="https://api.nasapicture.com/optimized"
       />
       <span>Testing 123</span>
+    </Pane>
+  );
+}
+
+export function SudokuPane(props: Omit<PaneProps, "children">) {
+  return (
+    <Pane {...props}>
+      <div className="h-full w-full flex flex-col items-center justify-around bg-white">
+        <Sudoku offset={0} />
+        <Sudoku offset={1} />
+      </div>
     </Pane>
   );
 }
