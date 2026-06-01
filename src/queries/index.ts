@@ -2,10 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 // import { Dayjs } from "dayjs";
 import z from "zod";
 
-// const STALE_TIME = {
-//   "24_HOURS": 60 * 60 * 24 * 1000,
-// };
-
 async function jsonFetch<T extends z.Schema>(
   input: RequestInfo | URL,
   init: RequestInit,
@@ -57,5 +53,30 @@ export function useXkcdQuery() {
         xkcdSchema,
       );
     },
+  });
+}
+
+const quoteSchema = z.object({
+  data: z.array(
+    z.object({
+      quote: z.string(),
+      author: z.string(),
+    }),
+  ),
+});
+
+export function useQuoteQuery() {
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const params = new URLSearchParams({
+    order: "random",
+    seed: today,
+    limit: "1",
+    min_len: "80",
+    category: "motivation",
+  });
+  const endpoint = `https://quotesapi.prayushadhikari.com.np/api/quotes?${params}`;
+  return useQuery({
+    queryKey: [endpoint],
+    queryFn: ({ signal }) => jsonFetch(endpoint, { signal }, quoteSchema),
   });
 }

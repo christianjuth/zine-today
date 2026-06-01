@@ -6,10 +6,12 @@ import {
   Context,
   NasaPane,
   PageSetup,
+  QuotePane,
   SudokuPane,
   UsLetter,
   WordOfTheDayPane,
   XkcdPane,
+  BackPane,
 } from "./components/panes";
 
 function mmToPx(mm: number, dpi = 100): number {
@@ -132,10 +134,13 @@ export function HomePage() {
   const panes = useMemo(
     () => [
       <NasaPane index={0} pageSetup={pageSetup} key="nasa" />,
-      <SudokuPane index={1} pageSetup={pageSetup} key="sudoku" />,
+      <SudokuPane index={1} pageSetup={pageSetup} key="sudoku-1" />,
       <WordOfTheDayPane index={2} pageSetup={pageSetup} key="word" />,
       <XkcdPane index={3} pageSetup={pageSetup} key="word" />,
-      <SudokuPane index={4} pageSetup={pageSetup} key="sudoku" />,
+      <SudokuPane index={4} pageSetup={pageSetup} key="sudoku-2" />,
+      <SudokuPane index={5} pageSetup={pageSetup} key="sudoku-3" />,
+      <QuotePane index={6} pageSetup={pageSetup} key="quote" />,
+      <BackPane index={7} pageSetup={pageSetup} key="back" />,
     ],
     [pageSetup],
   );

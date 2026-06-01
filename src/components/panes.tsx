@@ -7,10 +7,13 @@ import {
   type ReactNode,
 } from "react";
 import { Sudoku } from "./Sudoku";
-import { useWorkOfTheDayQuery, useXkcdQuery } from "../queries";
+import { useQuoteQuery, useWorkOfTheDayQuery, useXkcdQuery } from "../queries";
+import { ReactQRCode } from "@lglab/react-qr-code";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 dayjs.extend(localizedFormat);
+
+const TODAY = dayjs().format("YYYY-MM-DD");
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -127,7 +130,7 @@ export function NasaPane(props: Omit<PaneProps, "children">) {
         className="absolute inset-0 h-full w-full object-cover"
         src="https://api.nasapicture.com/optimized"
       />
-      <span className="absolute bottom-2 left-2 font-black bg-white px-1 py-0.5">
+      <span className="absolute bottom-2 left-2 font-black bg-gray-950 text-white px-1 py-0.5">
         {dayjs().format("ddd, LL")}
       </span>
     </Pane>
@@ -167,6 +170,58 @@ export function XkcdPane(props: Omit<PaneProps, "children">) {
       <div className="h-full w-full flex flex-col bg-white p-4 gap-2 items-center justify-center">
         <img src={query.data?.img} />
         <span>{query.data?.title}</span>
+      </div>
+    </Pane>
+  );
+}
+
+export function QuotePane(props: Omit<PaneProps, "children">) {
+  const query = useQuoteQuery();
+  const quote = query.data?.data[0];
+  return (
+    <Pane {...props}>
+      <blockquote className="h-full w-full flex flex-col bg-white p-6 justify-around">
+        <svg
+          className="w-9 h-9 text-heading mb-4"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 11V8a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1Zm0 0v2a4 4 0 0 1-4 4H5m14-6V8a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1Zm0 0v2a4 4 0 0 1-4 4h-1"
+          />
+        </svg>
+
+        <p className="text-base italic">{quote?.quote}</p>
+
+        <span className="text-base-content/50 text-base font-semibold">
+          ~ {quote?.author}
+        </span>
+      </blockquote>
+    </Pane>
+  );
+}
+
+export function BackPane(props: Omit<PaneProps, "children">) {
+  return (
+    <Pane {...props}>
+      <div className="bg-gray-950 h-full p-4 text-white flex flex-col items-end justify-end gap-2">
+        <span className="font-bold">Solutions</span>
+        <ReactQRCode
+          value={`${location.href}?solutions=${TODAY}`}
+          marginSize={0}
+          size={100}
+          dataModulesSettings={{ color: "white" }}
+          finderPatternInnerSettings={{ color: "white" }}
+          finderPatternOuterSettings={{ color: "white" }}
+        />
       </div>
     </Pane>
   );
