@@ -17,7 +17,7 @@ export function Sudoku(props: { offset: number }) {
             <div
               key={x}
               className={[
-                "flex h-5 w-5 items-center justify-center text-xl font-medium text-gray-800 select-none",
+                "flex h-5.5 w-5.5 items-center justify-center text-xl font-medium text-gray-800 select-none",
                 "border-t border-l border-gray-300",
                 y % 3 === 0 && "border-t-2 border-t-gray-800",
                 x % 3 === 0 && "border-l-2 border-l-gray-800",

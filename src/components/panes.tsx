@@ -7,7 +7,12 @@ import {
   type ReactNode,
 } from "react";
 import { Sudoku } from "./Sudoku";
-import { useQuoteQuery, useWorkOfTheDayQuery, useXkcdQuery } from "../queries";
+import {
+  useRssFeed,
+  useQuoteQuery,
+  useWorkOfTheDayQuery,
+  useXkcdQuery,
+} from "../queries";
 import { ReactQRCode } from "@lglab/react-qr-code";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
@@ -124,11 +129,12 @@ function Pane(props: PaneProps) {
 }
 
 export function NasaPane(props: Omit<PaneProps, "children">) {
+  const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
   return (
     <Pane {...props}>
       <img
         className="absolute inset-0 h-full w-full object-cover"
-        src="https://api.nasapicture.com/optimized"
+        src={feed?.items?.[0].enclosures?.[0].url}
       />
       <span className="absolute bottom-2 left-2 font-black bg-gray-950 text-white px-1 py-0.5">
         {dayjs().format("ddd, LL")}
@@ -138,9 +144,14 @@ export function NasaPane(props: Omit<PaneProps, "children">) {
 }
 
 export function SudokuPane(props: Omit<PaneProps, "children">) {
+  const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
   return (
     <Pane {...props}>
-      <div className="h-full w-full flex flex-col items-center justify-around bg-white">
+      <img
+        className="absolute inset-0 h-full w-full object-cover"
+        src={feed?.items?.[props.index].enclosures?.[0].url}
+      />
+      <div className="h-full w-full flex flex-col items-center justify-around relative">
         <Sudoku offset={props.index + 0.1} />
         <Sudoku offset={props.index + 0.2} />
       </div>
@@ -209,19 +220,56 @@ export function QuotePane(props: Omit<PaneProps, "children">) {
   );
 }
 
-export function BackPane(props: Omit<PaneProps, "children">) {
+export function ArticlePane(
+  props: Omit<PaneProps, "children"> & { src: string; limit: number },
+) {
+  const [feed] = useRssFeed(props.src);
   return (
     <Pane {...props}>
-      <div className="bg-gray-950 h-full p-4 text-white flex flex-col items-end justify-end gap-2">
-        <span className="font-bold">Solutions</span>
-        <ReactQRCode
-          value={`${location.href}?solutions=${TODAY}`}
-          marginSize={0}
-          size={100}
-          dataModulesSettings={{ color: "white" }}
-          finderPatternInnerSettings={{ color: "white" }}
-          finderPatternOuterSettings={{ color: "white" }}
-        />
+      <div className="bg-white h-full p-4 flex flex-col gap-3 justify-between">
+        {feed?.items?.slice(0, props.limit).map((item, i) => (
+          <div key={i} className="flex flex-col gap-2">
+            <span className="font-bold">{item.title}</span>
+            {item.description && (
+              <div
+                dangerouslySetInnerHTML={{ __html: item.description }}
+                className="flex flex-col gap-2"
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </Pane>
+  );
+}
+
+export function BackPane(props: Omit<PaneProps, "children">) {
+  const query = useQuoteQuery();
+  const quote = query.data?.data[0];
+  return (
+    <Pane {...props}>
+      <div className="bg-gray-950 h-full p-4 text-white flex flex-col items-end justify-between">
+        <blockquote className="flex flex-col gap-2">
+          <p className="text-sm italic text-gray-200">{quote?.quote}</p>
+
+          <span className="text-base font-semibold text-gray-400">
+            ~ {quote?.author}
+          </span>
+        </blockquote>
+
+        <div>
+          <span className="font-bold mb-1 block text-end text-gray-400">
+            Solutions
+          </span>
+          <ReactQRCode
+            value={`${location.href}?solutions=${TODAY}`}
+            marginSize={0}
+            size={100}
+            dataModulesSettings={{ color: "var(--color-gray-400)" }}
+            finderPatternInnerSettings={{ color: "var(--color-gray-400)" }}
+            finderPatternOuterSettings={{ color: "var(--color-gray-400)" }}
+          />
+        </div>
       </div>
     </Pane>
   );

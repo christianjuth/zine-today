@@ -1,6 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { parseRssFeed } from "feedsmith";
+import { useMemo } from "react";
 // import { Dayjs } from "dayjs";
 import z from "zod";
+
+async function textFetch(input: RequestInfo | URL, init: RequestInit) {
+  const res = await fetch(input, init);
+  return await res.text();
+}
 
 async function jsonFetch<T extends z.Schema>(
   input: RequestInfo | URL,
@@ -79,4 +86,16 @@ export function useQuoteQuery() {
     queryKey: [endpoint],
     queryFn: ({ signal }) => jsonFetch(endpoint, { signal }, quoteSchema),
   });
+}
+
+export function useRssFeed(url: string) {
+  const query = useQuery({
+    queryKey: [url],
+    queryFn: ({ signal }) => textFetch(url, { signal }),
+  });
+  const feed = useMemo(
+    () => (query.data ? parseRssFeed(query.data) : null),
+    [query.data],
+  );
+  return [feed, query] as const;
 }
