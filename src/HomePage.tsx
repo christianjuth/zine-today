@@ -1,0 +1,151 @@
+import { jsPDF } from "jspdf";
+import { toPng } from "html-to-image";
+import _ from "lodash";
+import { useState, useCallback, Fragment } from "react";
+import { Context, NasaPane, PageSetup, UsLetter } from "./components/panes";
+
+function mmToPx(mm: number, dpi = 100): number {
+  return Math.round((mm / 25.4) * dpi);
+}
+
+// function pxToMm(px: number, dpi = 300): number {
+//   return (px / dpi) * 25.4;
+// }
+
+async function waitForImages(root: HTMLElement) {
+  const images = Array.from(root.querySelectorAll("img"));
+
+  await Promise.all(
+    images.map(async (img) => {
+      if (!img.complete || img.naturalWidth === 0) {
+        await new Promise<void>((resolve, reject) => {
+          const onLoad = () => {
+            cleanup();
+            resolve();
+          };
+
+          const onError = () => {
+            cleanup();
+            reject(new Error(`Image failed to load: ${img.src}`));
+          };
+
+          const cleanup = () => {
+            img.removeEventListener("load", onLoad);
+            img.removeEventListener("error", onError);
+          };
+
+          img.addEventListener("load", onLoad);
+          img.addEventListener("error", onError);
+        });
+      }
+
+      await img.decode().catch(() => {});
+    }),
+  );
+}
+
+async function rotate(dataUrl: string, degrees: number): Promise<string> {
+  const img = new Image();
+  img.src = dataUrl;
+  await img.decode();
+
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not create canvas context");
+
+  ctx.translate(img.width, img.height);
+  ctx.rotate((degrees * Math.PI) / degrees);
+  ctx.drawImage(img, 0, 0);
+
+  return canvas.toDataURL("image/png");
+}
+
+async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
+  const pageWidthMm = ctx.pageSetup.pageWidthMm;
+  const pageHeightMm = ctx.pageSetup.pageHeightMm;
+
+  const paneWidth = ctx.pageSetup.paneWidth();
+  const paneHeight = ctx.pageSetup.paneHeight();
+
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: [pageWidthMm, pageHeightMm],
+  });
+
+  let i = 0;
+  for (const div of ctx.divs.slice(0, pageSetup.panelCount)) {
+    const paneIndex = ctx.pageSetup.translatePaneIndex(i);
+    if (_.isNil(paneIndex) || _.isNil(div)) {
+      continue;
+    }
+    const col = paneIndex.index % 4;
+    const row = paneIndex.index >= 4 ? 1 : 0;
+    await waitForImages(div);
+    let img = await toPng(div, {
+      height: mmToPx(paneHeight),
+      width: mmToPx(paneWidth),
+    });
+
+    if (paneIndex.rotate180) {
+      img = await rotate(img, 180);
+    }
+
+    doc.addImage(
+      img,
+      "png",
+      col * paneWidth,
+      row * paneHeight,
+      paneWidth,
+      paneHeight,
+    );
+    i++;
+  }
+
+  doc.save("a4.pdf");
+}
+
+const pageSetup = new UsLetter();
+
+export function HomePage() {
+  const [panes, setPanes] = useState<HTMLDivElement[]>([]);
+  const registerPane = useCallback(
+    (index: number, pane: HTMLDivElement) =>
+      setPanes((prev) => {
+        const clone = [...prev];
+        clone[index] = pane;
+        return clone;
+      }),
+    [],
+  );
+  return (
+    <>
+      <Context.Provider value={{ registerPane }}>
+        <div className="grid grid-cols-2 w-max mx-auto text-xs gap-y-5 py-5">
+          {Array.from({ length: 8 })
+            .fill(0)
+            .map((_num, index) => (
+              <Fragment key={index}>
+                <NasaPane index={index} pageSetup={pageSetup} />
+                {index === 0 && <div />}
+              </Fragment>
+            ))}
+        </div>
+      </Context.Provider>
+      <button
+        className="fixed top-5 left-5"
+        onClick={() =>
+          print({
+            divs: panes,
+            pageSetup,
+          })
+        }
+      >
+        Print
+      </button>
+    </>
+  );
+}
