@@ -30,3 +30,32 @@ export function useWorkOfTheDayQuery() {
       jsonFetch(endpoint, { signal }, wordOfTheDaySchema),
   });
 }
+
+const xkcdSchema = z.object({
+  title: z.string(),
+  img: z.string(),
+  num: z.number(),
+});
+
+export function useXkcdQuery() {
+  const endpoint =
+    "https://raw.githubusercontent.com/aghontpi/mirror-xkcd-api/main/syncState.json";
+  return useQuery({
+    queryKey: [endpoint],
+    queryFn: async ({ signal }) => {
+      const meta = await jsonFetch(
+        endpoint,
+        { signal },
+        z.object({
+          last_update_content: z.object({ id: z.string() }),
+        }),
+      );
+
+      return await jsonFetch(
+        `https://raw.githubusercontent.com/aghontpi/mirror-xkcd-api/main/api/${meta.last_update_content.id}/info.0.json`,
+        { signal },
+        xkcdSchema,
+      );
+    },
+  });
+}

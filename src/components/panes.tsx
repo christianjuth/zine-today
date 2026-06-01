@@ -7,7 +7,10 @@ import {
   type ReactNode,
 } from "react";
 import { Sudoku } from "./Sudoku";
-import { useWorkOfTheDayQuery } from "../queries";
+import { useWorkOfTheDayQuery, useXkcdQuery } from "../queries";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+dayjs.extend(localizedFormat);
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -124,7 +127,9 @@ export function NasaPane(props: Omit<PaneProps, "children">) {
         className="absolute inset-0 h-full w-full object-cover"
         src="https://api.nasapicture.com/optimized"
       />
-      <span>Testing 123</span>
+      <span className="absolute bottom-2 left-2 font-black bg-white px-1 py-0.5">
+        {dayjs().format("ddd, LL")}
+      </span>
     </Pane>
   );
 }
@@ -133,8 +138,8 @@ export function SudokuPane(props: Omit<PaneProps, "children">) {
   return (
     <Pane {...props}>
       <div className="h-full w-full flex flex-col items-center justify-around bg-white">
-        <Sudoku offset={0} />
-        <Sudoku offset={1} />
+        <Sudoku offset={props.index + 0.1} />
+        <Sudoku offset={props.index + 0.2} />
       </div>
     </Pane>
   );
@@ -150,6 +155,18 @@ export function WordOfTheDayPane(props: Omit<PaneProps, "children">) {
         </span>
         <span className="capitalize">{query.data?.definition}</span>
         <span>Etymology: {query.data?.etymology}</span>
+      </div>
+    </Pane>
+  );
+}
+
+export function XkcdPane(props: Omit<PaneProps, "children">) {
+  const query = useXkcdQuery();
+  return (
+    <Pane {...props}>
+      <div className="h-full w-full flex flex-col bg-white p-4 gap-2 items-center justify-center">
+        <img src={query.data?.img} />
+        <span>{query.data?.title}</span>
       </div>
     </Pane>
   );
