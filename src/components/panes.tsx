@@ -99,6 +99,7 @@ type PaneProps = {
   index: number;
   pageSetup: PageSetup;
   children: ReactNode;
+  className?: string;
 };
 
 function Pane(props: PaneProps) {
@@ -115,7 +116,7 @@ function Pane(props: PaneProps) {
 
   return (
     <div
-      className="relative"
+      className={"relative " + props.className}
       ref={ref}
       style={{
         width: mmToPx(pageSetup.paneWidth()),
@@ -232,6 +233,7 @@ export function ArticlePane(
             <span className="font-bold">{item.title}</span>
             {item.description && (
               <div
+                // TODO: clean html
                 dangerouslySetInnerHTML={{ __html: item.description }}
                 className="flex flex-col gap-2"
               />
@@ -271,6 +273,31 @@ export function BackPane(props: Omit<PaneProps, "children">) {
           />
         </div>
       </div>
+    </Pane>
+  );
+}
+
+export function SaturdayMorningComicPane(props: Omit<PaneProps, "children">) {
+  const [items] = useRssFeed(
+    "https://www.comicsrss.com/rss/ninechickweedlane.rss",
+  );
+  const item = items?.items?.[0];
+  const paneHeight = mmToPx(props.pageSetup.paneHeight());
+  const paneWidth = mmToPx(props.pageSetup.paneWidth());
+  return (
+    <Pane {...props} className="bg-white">
+      {item?.description && (
+        <div
+          // TODO: clean html
+          dangerouslySetInnerHTML={{ __html: item.description }}
+          className="flex flex-col justify-center gap-2 p-2 rotate-90 origin-top-left"
+          style={{
+            width: paneHeight,
+            height: paneWidth,
+            transform: `translate(0, -${paneWidth}px)`,
+          }}
+        />
+      )}
     </Pane>
   );
 }

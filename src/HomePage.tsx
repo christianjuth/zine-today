@@ -13,6 +13,7 @@ import {
   XkcdPane,
   BackPane,
   ArticlePane,
+  SaturdayMorningComicPane,
 } from "./components/panes";
 
 function mmToPx(mm: number, dpi = 100): number {
@@ -145,7 +146,12 @@ export function HomePage() {
         limit={1}
         key="news-0"
       />,
-      <SudokuPane index={5} pageSetup={pageSetup} key="sudoku-2" />,
+      // <SudokuPane index={5} pageSetup={pageSetup} key="sudoku-2" />,
+      <SaturdayMorningComicPane
+        index={5}
+        pageSetup={pageSetup}
+        key="sudoku-2"
+      />,
       <ArticlePane
         index={6}
         pageSetup={pageSetup}
@@ -160,11 +166,11 @@ export function HomePage() {
   return (
     <>
       <Context.Provider value={{ registerPane }}>
-        <div className="grid grid-cols-2 w-max mx-auto text-xs gap-y-5 py-5">
+        <div className="flex flex-row flex-wrap text-xs gap-y-5 py-5 justify-center">
           {panes.map((pane, index) => (
             <Fragment key={index}>
+              {index % 2 === 1 && <div className="w-5" />}
               {pane}
-              {index === 0 && <div />}
             </Fragment>
           ))}
         </div>
