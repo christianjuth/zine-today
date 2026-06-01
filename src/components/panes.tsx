@@ -6,8 +6,8 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { generateSudoku } from "../lib/sudoku";
 import { Sudoku } from "./Sudoku";
+import { useWorkOfTheDayQuery } from "../queries";
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -95,8 +95,6 @@ function Pane(props: PaneProps) {
   const ref = useRef<HTMLDivElement>(null);
   const { registerPane } = useContext(Context);
 
-  // TODO: revoew object url
-
   useEffect(() => {
     const div = ref.current;
     if (div) {
@@ -137,6 +135,21 @@ export function SudokuPane(props: Omit<PaneProps, "children">) {
       <div className="h-full w-full flex flex-col items-center justify-around bg-white">
         <Sudoku offset={0} />
         <Sudoku offset={1} />
+      </div>
+    </Pane>
+  );
+}
+
+export function WordOfTheDayPane(props: Omit<PaneProps, "children">) {
+  const query = useWorkOfTheDayQuery();
+  return (
+    <Pane {...props}>
+      <div className="h-full w-full flex flex-col bg-white px-4 gap-6 justify-center">
+        <span className="text-lg font-black capitalize">
+          {query.data?.word}
+        </span>
+        <span className="capitalize">{query.data?.definition}</span>
+        <span>Etymology: {query.data?.etymology}</span>
       </div>
     </Pane>
   );

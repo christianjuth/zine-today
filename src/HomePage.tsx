@@ -8,6 +8,7 @@ import {
   PageSetup,
   SudokuPane,
   UsLetter,
+  WordOfTheDayPane,
 } from "./components/panes";
 
 function mmToPx(mm: number, dpi = 100): number {
@@ -131,6 +132,7 @@ export function HomePage() {
     () => [
       <NasaPane index={0} pageSetup={pageSetup} key="nasa" />,
       <SudokuPane index={1} pageSetup={pageSetup} key="sudoku" />,
+      <WordOfTheDayPane index={2} pageSetup={pageSetup} key="word" />,
     ],
     [pageSetup],
   );
