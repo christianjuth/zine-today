@@ -315,17 +315,23 @@ export function WordSearch(props: Omit<PaneProps, "children">) {
     [xkcdQuery.data],
   );
 
+  const museumQuery = useMuseumQuery();
+  const museumWords = useMemo(
+    () => museumQuery.data?.data[0].artist_title.split(" ") ?? [],
+    [xkcdQuery.data],
+  );
+
   const puzzle = useMemo(
     () =>
       generateWordSearch(
-        _.compact([wordOfTheDayQuery.data?.word, ...xkcdWords]),
+        _.compact([wordOfTheDayQuery.data?.word, ...xkcdWords, ...museumWords]),
         TODAY,
         {
           rows: 15,
           cols: 11,
         },
       ),
-    [wordOfTheDayQuery.data, xkcdWords],
+    [wordOfTheDayQuery.data, xkcdWords, museumWords],
   );
 
   return (

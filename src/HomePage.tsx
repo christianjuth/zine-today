@@ -144,15 +144,15 @@ export function HomePage() {
       <SudokuPane index={1} pageSetup={pageSetup} key="sudoku-1" />,
       <WordOfTheDayPane index={2} pageSetup={pageSetup} key="word" />,
       <XkcdPane index={3} pageSetup={pageSetup} key="word" />,
-      <ArticlePane
-        index={4}
-        pageSetup={pageSetup}
-        src="https://aeon.co/feed.rss"
-        limit={1}
-        key="news-0"
-      />,
+      <SudokuPane index={4} pageSetup={pageSetup} key="sudoku-2" />,
+      // <ArticlePane
+      //   index={4}
+      //   pageSetup={pageSetup}
+      //   src="https://aeon.co/feed.rss"
+      //   limit={1}
+      //   key="news-0"
+      // />,
       <WordSearch index={5} pageSetup={pageSetup} key="sudoku-2" />,
-      // <SudokuPane index={5} pageSetup={pageSetup} key="sudoku-2" />,
       // <SaturdayMorningComicPane
       //   index={5}
       //   pageSetup={pageSetup}
