@@ -5,6 +5,7 @@ import {
   useRef,
   useEffect,
   type ReactNode,
+  useMemo,
 } from "react";
 import { Sudoku } from "./Sudoku";
 import {
@@ -12,10 +13,12 @@ import {
   useQuoteQuery,
   useWorkOfTheDayQuery,
   useXkcdQuery,
+  useMuseumQuery,
 } from "../queries";
 import { ReactQRCode } from "@lglab/react-qr-code";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import { generateWordSearch } from "../lib/word-search";
 dayjs.extend(localizedFormat);
 
 const TODAY = dayjs().format("YYYY-MM-DD");
@@ -84,7 +87,7 @@ export class UsLetter implements PageSetup {
       case 6:
         return { index: 0, rotate180: true };
       case 7:
-        return { index: 4, rotate180: true };
+        return { index: 4 };
     }
   }
 }
@@ -281,7 +284,7 @@ export function SaturdayMorningComicPane(props: Omit<PaneProps, "children">) {
   const [items] = useRssFeed(
     "https://www.comicsrss.com/rss/ninechickweedlane.rss",
   );
-  const item = items?.items?.[0];
+  const item = items?.items?.[3];
   const paneHeight = mmToPx(props.pageSetup.paneHeight());
   const paneWidth = mmToPx(props.pageSetup.paneWidth());
   return (
@@ -298,6 +301,81 @@ export function SaturdayMorningComicPane(props: Omit<PaneProps, "children">) {
           }}
         />
       )}
+    </Pane>
+  );
+}
+
+export function WordSearch(props: Omit<PaneProps, "children">) {
+  const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
+  const nasaImg = feed?.items?.[props.index];
+  const wordOfTheDayQuery = useWorkOfTheDayQuery();
+  const xkcdQuery = useXkcdQuery();
+  const xkcdWords = useMemo(
+    () => xkcdQuery.data?.title.split(" ") ?? [],
+    [xkcdQuery.data],
+  );
+
+  const puzzle = useMemo(
+    () =>
+      generateWordSearch(
+        _.compact([wordOfTheDayQuery.data?.word, ...xkcdWords]),
+        TODAY,
+        {
+          rows: 15,
+          cols: 11,
+        },
+      ),
+    [wordOfTheDayQuery.data, xkcdWords],
+  );
+
+  return (
+    <Pane {...props} className="bg-white flex flex-col">
+      <img
+        className="absolute inset-0 h-full w-full object-cover"
+        src={nasaImg?.enclosures?.[0].url}
+      />
+      <div className="flex-1 flex justify-center items-center">
+        <div className="inline-block border-b-2 border-r-2 border-gray-800 bg-white relative">
+          {puzzle.grid.map((row, y) => (
+            <div key={y} className="flex">
+              {row.map((cell, x) => (
+                <div
+                  key={x}
+                  className="flex h-5.5 w-5.5 items-center justify-center text-base font-medium text-gray-800 uppercase select-none border-t border-l border-gray-800"
+                >
+                  {cell}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      <ul className="bg-white relative py-1 px-2 grid grid-cols-2 m-3.5 mt-0 border">
+        {puzzle.placements.map((placement, index) => (
+          <li key={placement.word}>
+            {index + 1}. {placement.word}{" "}
+          </li>
+        ))}
+      </ul>
+    </Pane>
+  );
+}
+
+export function BookOtdPanel(props: Omit<PaneProps, "children">) {
+  const query = useMuseumQuery();
+  const item = query.data?.data[0];
+  const imgSrc = `${query.data?.config.iiif_url}/${item?.image_id}/full/400,/0/default.jpg`;
+  return (
+    <Pane
+      {...props}
+      className="flex flex-col bg-white p-4 gap-2 items-center justify-center"
+    >
+      <div className="overflow-hidden">
+        <img src={imgSrc} className="h-full object-contain" />
+      </div>
+      <span>{item?.title}</span>
+      <span>{item?.artist_title}</span>
+      <span>{item?.date_display}</span>
     </Pane>
   );
 }

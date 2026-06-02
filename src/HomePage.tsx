@@ -6,15 +6,18 @@ import {
   Context,
   NasaPane,
   PageSetup,
-  QuotePane,
   SudokuPane,
   UsLetter,
   WordOfTheDayPane,
   XkcdPane,
   BackPane,
   ArticlePane,
-  SaturdayMorningComicPane,
+  WordSearch,
+  BookOtdPanel,
 } from "./components/panes";
+import dayjs from "dayjs";
+
+const TODAY = dayjs().format("YYYY-MM-DD");
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -90,34 +93,36 @@ async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
 
   let i = 0;
   for (const div of ctx.divs.slice(0, pageSetup.panelCount)) {
-    const paneIndex = ctx.pageSetup.translatePaneIndex(i);
-    if (_.isNil(paneIndex) || _.isNil(div)) {
-      continue;
-    }
-    const col = paneIndex.index % 4;
-    const row = paneIndex.index >= 4 ? 1 : 0;
-    await waitForImages(div);
-    let img = await toPng(div, {
-      height: mmToPx(paneHeight),
-      width: mmToPx(paneWidth),
-    });
+    try {
+      const paneIndex = ctx.pageSetup.translatePaneIndex(i);
+      if (_.isNil(paneIndex) || _.isNil(div)) {
+        continue;
+      }
+      const col = paneIndex.index % 4;
+      const row = paneIndex.index >= 4 ? 1 : 0;
+      await waitForImages(div);
+      let img = await toPng(div, {
+        height: mmToPx(paneHeight),
+        width: mmToPx(paneWidth),
+      });
 
-    if (paneIndex.rotate180) {
-      img = await rotate(img, 180);
-    }
+      if (paneIndex.rotate180) {
+        img = await rotate(img, 180);
+      }
 
-    doc.addImage(
-      img,
-      "png",
-      col * paneWidth,
-      row * paneHeight,
-      paneWidth,
-      paneHeight,
-    );
+      doc.addImage(
+        img,
+        "png",
+        col * paneWidth,
+        row * paneHeight,
+        paneWidth,
+        paneHeight,
+      );
+    } catch {}
     i++;
   }
 
-  doc.save("a4.pdf");
+  doc.save(`zine-today-${TODAY}.pdf`);
 }
 
 const pageSetup = new UsLetter();
@@ -146,19 +151,21 @@ export function HomePage() {
         limit={1}
         key="news-0"
       />,
+      <WordSearch index={5} pageSetup={pageSetup} key="sudoku-2" />,
       // <SudokuPane index={5} pageSetup={pageSetup} key="sudoku-2" />,
-      <SaturdayMorningComicPane
-        index={5}
-        pageSetup={pageSetup}
-        key="sudoku-2"
-      />,
-      <ArticlePane
-        index={6}
-        pageSetup={pageSetup}
-        src="https://www.newyorker.com/feed/latest/rss"
-        limit={4}
-        key="news-1"
-      />,
+      // <SaturdayMorningComicPane
+      //   index={5}
+      //   pageSetup={pageSetup}
+      //   key="sudoku-2"
+      // />,
+      // <ArticlePane
+      //   index={6}
+      //   pageSetup={pageSetup}
+      //   src="https://www.newyorker.com/feed/fiction-and-poetry/rss"
+      //   limit={4}
+      //   key="news-1"
+      // />,
+      <BookOtdPanel index={6} pageSetup={pageSetup} key="back" />,
       <BackPane index={7} pageSetup={pageSetup} key="back" />,
     ],
     [pageSetup],
@@ -176,7 +183,7 @@ export function HomePage() {
         </div>
       </Context.Provider>
       <button
-        className="fixed top-5 left-5"
+        className="fixed top-5 left-5 z-50 bg-white px-1"
         onClick={() =>
           print({
             divs: divs,

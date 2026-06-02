@@ -3,6 +3,7 @@ import { parseRssFeed } from "feedsmith";
 import { useMemo } from "react";
 // import { Dayjs } from "dayjs";
 import z from "zod";
+import { issueNumber } from "../lib/issue-number";
 
 async function textFetch(input: RequestInfo | URL, init: RequestInit) {
   const res = await fetch(input, init);
@@ -98,4 +99,50 @@ export function useRssFeed(url: string) {
     [query.data],
   );
   return [feed, query] as const;
+}
+
+const museumSchema = z.object({
+  data: z.array(
+    z.object({
+      title: z.string(),
+      artist_title: z.string(),
+      image_id: z.string(),
+      thumbnail: z.object({ lqip: z.string() }),
+      date_display: z.string(),
+    }),
+  ),
+  config: z.object({
+    iiif_url: z.string(),
+  }),
+});
+
+export function useMuseumQuery() {
+  const params = {
+    query: {
+      bool: {
+        must: [
+          { term: { is_public_domain: true } },
+          { exists: { field: "image_id" } },
+        ],
+      },
+    },
+    sort: [{ id: { order: "asc" } }],
+    from: issueNumber(),
+    size: 1,
+    fields: [
+      "id",
+      "title",
+      "artist_title",
+      "date_display",
+      "image_id",
+      "is_public_domain",
+      "thumbnail",
+    ],
+  };
+  const endpoint = `https://api.artic.edu/api/v1/artworks/search?params=${encodeURIComponent(JSON.stringify(params))}`;
+  return useQuery({
+    queryKey: [endpoint],
+    queryFn: ({ signal }) => jsonFetch(endpoint, { signal }, museumSchema),
+    staleTime: 0,
+  });
 }
