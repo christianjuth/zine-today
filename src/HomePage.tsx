@@ -11,21 +11,14 @@ import {
   WordOfTheDayPane,
   XkcdPane,
   BackPane,
-  ArticlePane,
   WordSearch,
   BookOtdPanel,
-} from "./components/panes";
-import dayjs from "dayjs";
-
-const TODAY = dayjs().format("YYYY-MM-DD");
+} from "./components/panes/index";
+import { TODAY } from "./lib/date";
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
 }
-
-// function pxToMm(px: number, dpi = 300): number {
-//   return (px / dpi) * 25.4;
-// }
 
 async function waitForImages(root: HTMLElement) {
   const images = Array.from(root.querySelectorAll("img"));
@@ -118,7 +111,9 @@ async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
         paneWidth,
         paneHeight,
       );
-    } catch {}
+    } catch (err) {
+      console.error(err);
+    }
     i++;
   }
 

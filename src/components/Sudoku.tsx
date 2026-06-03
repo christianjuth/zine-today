@@ -1,13 +1,14 @@
-import { useRef } from "react";
+import { useMemo } from "react";
 import { generateSudoku } from "../lib/sudoku";
 import dayjs from "dayjs";
 
 const TODAY = dayjs().format("YYYY-MM-DD");
 
 export function Sudoku(props: { offset: number }) {
-  const puzzle = useRef(
-    generateSudoku(TODAY + props.offset, { difficulty: "medium" }),
-  ).current;
+  const puzzle = useMemo(
+    () => generateSudoku(TODAY + props.offset, { difficulty: "medium" }),
+    [props.offset],
+  );
 
   return (
     <div className="inline-block border-b-2 border-r-2 border-gray-800 bg-white">
