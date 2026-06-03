@@ -10,11 +10,17 @@ export abstract class PageSetup {
   abstract rows: number;
   abstract cols: number;
 
-  abstract pageHeightMm: number;
-  abstract pageWidthMm: number;
+  abstract _margin: number;
+  abstract _pageHeightMm: number;
+  abstract _pageWidthMm: number;
 
-  abstract paneWidth(): number;
-  abstract paneHeight(): number;
+  abstract pageMarginMm(): number;
+
+  abstract pageHeightMm(): number;
+  abstract pageWidthMm(): number;
+
+  abstract paneWidthMm(): number;
+  abstract paneHeightMm(): number;
 
   abstract paneAspectRatio(): number;
 
@@ -30,19 +36,32 @@ export class UsLetter implements PageSetup {
   panelCount = 8;
   cols = 4;
   rows = 2;
-  pageHeightMm = 215.9;
-  pageWidthMm = 279.4;
+  _margin = 4;
+  _pageHeightMm = 215.9;
+  _pageWidthMm = 279.4;
 
-  paneWidth() {
-    return this.pageWidthMm / this.cols;
+  pageMarginMm() {
+    return this._margin;
   }
 
-  paneHeight() {
-    return this.pageHeightMm / this.rows;
+  pageWidthMm() {
+    return this._pageWidthMm - this._margin * 2;
+  }
+
+  pageHeightMm() {
+    return this._pageHeightMm - this._margin * 2;
+  }
+
+  paneWidthMm() {
+    return this.pageWidthMm() / this.cols;
+  }
+
+  paneHeightMm() {
+    return this.pageHeightMm() / this.rows;
   }
 
   paneAspectRatio() {
-    return this.paneWidth() / this.paneHeight();
+    return this.paneWidthMm() / this.paneHeightMm();
   }
 
   translatePaneIndex(

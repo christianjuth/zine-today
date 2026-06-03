@@ -44,8 +44,8 @@ function Pane(props: PaneProps) {
       className={"relative " + props.className}
       ref={ref}
       style={{
-        width: mmToPx(pageSetup.paneWidth()),
-        height: mmToPx(pageSetup.paneHeight()),
+        width: mmToPx(pageSetup.paneWidthMm()),
+        height: mmToPx(pageSetup.paneHeightMm()),
         aspectRatio: pageSetup.paneAspectRatio(),
       }}
     >
@@ -207,8 +207,8 @@ export function SaturdayMorningComicPane(props: Omit<PaneProps, "children">) {
     "https://www.comicsrss.com/rss/ninechickweedlane.rss",
   );
   const item = items?.items?.[3];
-  const paneHeight = mmToPx(props.pageSetup.paneHeight());
-  const paneWidth = mmToPx(props.pageSetup.paneWidth());
+  const paneHeight = mmToPx(props.pageSetup.paneHeightMm());
+  const paneWidth = mmToPx(props.pageSetup.paneWidthMm());
   return (
     <Pane {...props} className="bg-white">
       {item?.description && (

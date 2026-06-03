@@ -72,16 +72,21 @@ async function rotate(dataUrl: string, degrees: number): Promise<string> {
 }
 
 async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
-  const pageWidthMm = ctx.pageSetup.pageWidthMm;
-  const pageHeightMm = ctx.pageSetup.pageHeightMm;
+  const marginMm = ctx.pageSetup.pageMarginMm();
 
-  const paneWidth = ctx.pageSetup.paneWidth();
-  const paneHeight = ctx.pageSetup.paneHeight();
+  const pageWidthMm = ctx.pageSetup.pageWidthMm();
+  const pageHeightMm = ctx.pageSetup.pageHeightMm();
+
+  const paneWidthMm = ctx.pageSetup.paneWidthMm();
+  const paneHeightMm = ctx.pageSetup.paneHeightMm();
+
+  const rows = ctx.pageSetup.rows;
+  const cols = ctx.pageSetup.cols;
 
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
-    format: [pageWidthMm, pageHeightMm],
+    format: [pageWidthMm + marginMm * 2, pageHeightMm + marginMm * 2],
   });
 
   let i = 0;
@@ -95,8 +100,8 @@ async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
       const row = paneIndex.index >= 4 ? 1 : 0;
       await waitForImages(div);
       let img = await toPng(div, {
-        height: mmToPx(paneHeight),
-        width: mmToPx(paneWidth),
+        height: mmToPx(paneHeightMm),
+        width: mmToPx(paneWidthMm),
       });
 
       if (paneIndex.rotate180) {
@@ -106,15 +111,33 @@ async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
       doc.addImage(
         img,
         "png",
-        col * paneWidth,
-        row * paneHeight,
-        paneWidth,
-        paneHeight,
+        col * paneWidthMm + marginMm,
+        row * paneHeightMm + marginMm,
+        paneWidthMm,
+        paneHeightMm,
       );
     } catch (err) {
       console.error(err);
     }
     i++;
+  }
+
+  for (let r = 1; r < rows; r++) {
+    doc.line(
+      marginMm,
+      paneHeightMm * r + marginMm,
+      pageWidthMm + marginMm,
+      paneHeightMm * r + marginMm,
+    );
+  }
+
+  for (let c = 1; c < cols; c++) {
+    doc.line(
+      paneWidthMm * c + marginMm,
+      marginMm,
+      paneWidthMm * c + marginMm,
+      pageHeightMm + marginMm,
+    );
   }
 
   doc.save(`zine-today-${TODAY}.pdf`);
