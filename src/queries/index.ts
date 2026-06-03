@@ -79,7 +79,8 @@ export function useQuoteQuery() {
     order: "random",
     seed: today,
     limit: "1",
-    min_len: "80",
+    min_len: "50",
+    max_len: "300",
     category: "motivation",
   });
   const endpoint = `https://quotesapi.prayushadhikari.com.np/api/quotes?${params}`;
