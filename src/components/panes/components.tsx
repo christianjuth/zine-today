@@ -49,7 +49,7 @@ function Pane(props: PaneProps) {
 
   return (
     <div
-      className={"relative " + props.className}
+      className={cn("relative", props.className)}
       ref={ref}
       style={{
         width: mmToPx(pageSetup.paneWidthMm()),
@@ -70,7 +70,7 @@ export function NasaPane(props: Omit<PaneProps, "children">) {
         className="absolute inset-0 h-full w-full object-cover"
         src={feed?.items?.[0].enclosures?.[0].url}
       />
-      <span className="absolute bottom-2 left-2 font-black bg-gray-950 text-white px-1 py-0.5">
+      <span className="absolute bottom-4 left-4 font-black bg-gray-950 text-white px-1 py-0.5">
         {dayjs().format("ddd, LL")}
       </span>
     </Pane>
@@ -85,7 +85,7 @@ export function SudokuPane(props: Omit<PaneProps, "children">) {
         className="absolute inset-0 h-full w-full object-cover"
         src={feed?.items?.[props.index].enclosures?.[0].url}
       />
-      <div className="h-full w-full flex flex-col items-center justify-around relative">
+      <div className="h-full w-full flex flex-col gap-1 items-center justify-center relative">
         <Sudoku offset={props.index + 0.1} />
         <Sudoku offset={props.index + 0.2} />
       </div>
@@ -209,7 +209,7 @@ export function BackPane(props: Omit<PaneProps, "children">) {
   const quote = query.data?.data[0];
   return (
     <Pane {...props}>
-      <div className="bg-gray-950 h-full p-4 text-white flex flex-col items-end justify-between">
+      <div className="bg-gray-950 h-full p-5.5 text-white flex flex-col items-end justify-between">
         <blockquote className="flex flex-col gap-2">
           <p className="text-sm italic text-gray-200">{quote?.quote}</p>
 
@@ -283,7 +283,7 @@ export function WordSearch(props: Omit<PaneProps, "children">) {
         _.compact([wordOfTheDayQuery.data?.word, ...xkcdWords, ...museumWords]),
         TODAY,
         {
-          rows: 15,
+          rows: 14,
           cols: 11,
         },
       ),
@@ -291,28 +291,29 @@ export function WordSearch(props: Omit<PaneProps, "children">) {
   );
 
   return (
-    <Pane {...props} className="bg-white flex flex-col">
+    <Pane
+      {...props}
+      className="bg-white flex flex-col justify-center items-center gap-1"
+    >
       <img
         className="absolute inset-0 h-full w-full object-cover"
         src={nasaImg?.enclosures?.[0].url}
       />
-      <div className="flex-1 flex justify-center items-center">
-        <div className="inline-block border-b-2 border-r-2 border-gray-800 bg-white relative">
-          {puzzle.grid.map((row, y) => (
-            <div key={y} className="flex">
-              {row.map((cell, x) => (
-                <div
-                  key={x}
-                  className="flex h-5.5 w-5.5 items-center justify-center text-base font-medium text-gray-800 uppercase select-none border-t border-l border-gray-800"
-                >
-                  {cell}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
+      <div className="inline-block border-b-2 border-r-2 border-gray-800 bg-white relative">
+        {puzzle.grid.map((row, y) => (
+          <div key={y} className="flex">
+            {row.map((cell, x) => (
+              <div
+                key={x}
+                className="flex h-5.5 w-5.5 items-center justify-center text-base font-medium text-gray-800 uppercase select-none border-t border-l border-gray-800"
+              >
+                {cell}
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
-      <ul className="bg-white relative py-1 px-2 grid grid-cols-2 m-3.5 mt-0 border">
+      <ul className="bg-white relative py-1 px-2 grid grid-cols-2 w-[244px] border text-sm">
         {puzzle.placements.map((placement, index) => (
           <li key={placement.word}>
             {index + 1}. {placement.word}{" "}
@@ -330,7 +331,7 @@ export function BookOtdPanel(props: Omit<PaneProps, "children">) {
   return (
     <Pane
       {...props}
-      className="flex flex-col bg-white p-4 gap-2 items-center justify-center"
+      className="flex flex-col bg-white p-5.5 gap-2 items-center justify-center"
     >
       <div className="overflow-hidden">
         <img src={imgSrc} className="h-full object-contain" />

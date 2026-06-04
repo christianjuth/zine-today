@@ -170,10 +170,10 @@ export function HomePage() {
     [pageSetup],
   );
   return (
-    <>
-      <div>
-        <Context.Provider value={{ registerPane }}>
-          <div className="flex flex-row flex-wrap text-xs gap-y-5 py-5 justify-center">
+    <div className="flex flex-row gap-10 h-[100lvh]">
+      <Context.Provider value={{ registerPane }}>
+        <div className="flex flex-row flex-wrap gap-y-5 py-5 items-center justify-center">
+          <div className="flex flex-row flex-wrap gap-y-5 justify-center">
             {panes.map((pane, index) => (
               <Fragment key={index}>
                 {index % 2 === 1 && <div className="w-5" />}
@@ -181,19 +181,23 @@ export function HomePage() {
               </Fragment>
             ))}
           </div>
-        </Context.Provider>
+        </div>
+      </Context.Provider>
+      <div className="w-80 bg-black text-white p-8">
+        <h1>Zine.today</h1>
+        <h2>Step 1.</h2>
+        <button
+          className="bg-white px-1"
+          onClick={() =>
+            print({
+              divs: divs,
+              pageSetup,
+            })
+          }
+        >
+          Print
+        </button>
       </div>
-      <button
-        className="fixed top-5 left-5 z-50 bg-white px-1"
-        onClick={() =>
-          print({
-            divs: divs,
-            pageSetup,
-          })
-        }
-      >
-        Print
-      </button>
-    </>
+    </div>
   );
 }
