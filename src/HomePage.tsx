@@ -15,6 +15,10 @@ import {
   BookOtdPanel,
 } from "./components/panes/index";
 import { TODAY } from "./lib/date";
+import { issueNumber } from "./lib/issue-number";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+dayjs.extend(localizedFormat);
+import dayjs from "dayjs";
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -170,9 +174,9 @@ export function HomePage() {
     [pageSetup],
   );
   return (
-    <div className="flex flex-row gap-10 h-[100lvh]">
+    <div className="flex flex-row h-[100lvh]">
       <Context.Provider value={{ registerPane }}>
-        <div className="flex flex-row flex-wrap gap-y-5 py-5 items-center justify-center">
+        <div className="flex flex-row flex-wrap gap-y-5 py-5 items-center justify-center bg-neutral-700">
           <div className="flex flex-row flex-wrap gap-y-5 justify-center">
             {panes.map((pane, index) => (
               <Fragment key={index}>
@@ -183,11 +187,14 @@ export function HomePage() {
           </div>
         </div>
       </Context.Provider>
-      <div className="w-80 bg-black text-white p-8">
-        <h1>Zine.today</h1>
-        <h2>Step 1.</h2>
+      <div className="min-w-120 max-w-120 bg-black text-white p-8 flex flex-col gap-6">
+        <h1 className="font-black text-xl">Zine.today</h1>
+        <h2 className="font-bold">
+          {dayjs().format("ddd ll")}, Issue #{issueNumber()}
+        </h2>
+        <h2>Step 1. Print</h2>
         <button
-          className="bg-white px-1"
+          className="bg-white text-black px-1"
           onClick={() =>
             print({
               divs: divs,
@@ -197,6 +204,11 @@ export function HomePage() {
         >
           Print
         </button>
+        <h2>Step 2. Fold</h2>
+        <iframe
+          src="https://www.youtube.com/embed/o20s2JNyBtI"
+          className="w-full aspect-video"
+        />
       </div>
     </div>
   );
