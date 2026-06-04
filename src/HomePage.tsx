@@ -161,28 +161,9 @@ export function HomePage() {
       <NasaPane index={0} pageSetup={pageSetup} key="nasa" />,
       <SudokuPane index={1} pageSetup={pageSetup} key="sudoku-1" />,
       <WordOfTheDayPane index={2} pageSetup={pageSetup} key="word" />,
-      <XkcdPane index={3} pageSetup={pageSetup} key="word" />,
-      <SudokuPane index={4} pageSetup={pageSetup} key="sudoku-2" />,
-      // <ArticlePane
-      //   index={4}
-      //   pageSetup={pageSetup}
-      //   src="https://aeon.co/feed.rss"
-      //   limit={1}
-      //   key="news-0"
-      // />,
+      <SudokuPane index={3} pageSetup={pageSetup} key="sudoku-2" />,
+      <XkcdPane index={4} pageSetup={pageSetup} key="word" />,
       <WordSearch index={5} pageSetup={pageSetup} key="sudoku-2" />,
-      // <SaturdayMorningComicPane
-      //   index={5}
-      //   pageSetup={pageSetup}
-      //   key="sudoku-2"
-      // />,
-      // <ArticlePane
-      //   index={6}
-      //   pageSetup={pageSetup}
-      //   src="https://www.newyorker.com/feed/fiction-and-poetry/rss"
-      //   limit={4}
-      //   key="news-1"
-      // />,
       <BookOtdPanel index={6} pageSetup={pageSetup} key="back" />,
       <BackPane index={7} pageSetup={pageSetup} key="back" />,
     ],
@@ -190,16 +171,18 @@ export function HomePage() {
   );
   return (
     <>
-      <Context.Provider value={{ registerPane }}>
-        <div className="flex flex-row flex-wrap text-xs gap-y-5 py-5 justify-center">
-          {panes.map((pane, index) => (
-            <Fragment key={index}>
-              {index % 2 === 1 && <div className="w-5" />}
-              {pane}
-            </Fragment>
-          ))}
-        </div>
-      </Context.Provider>
+      <div>
+        <Context.Provider value={{ registerPane }}>
+          <div className="flex flex-row flex-wrap text-xs gap-y-5 py-5 justify-center">
+            {panes.map((pane, index) => (
+              <Fragment key={index}>
+                {index % 2 === 1 && <div className="w-5" />}
+                {pane}
+              </Fragment>
+            ))}
+          </div>
+        </Context.Provider>
+      </div>
       <button
         className="fixed top-5 left-5 z-50 bg-white px-1"
         onClick={() =>

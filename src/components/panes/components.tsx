@@ -1,5 +1,12 @@
 import _ from "lodash";
-import { useContext, useRef, useEffect, useMemo, type ReactNode } from "react";
+import {
+  useContext,
+  useRef,
+  useEffect,
+  useMemo,
+  type ReactNode,
+  useState,
+} from "react";
 import { Sudoku } from "../Sudoku";
 import {
   useRssFeed,
@@ -14,6 +21,7 @@ import localizedFormat from "dayjs/plugin/localizedFormat";
 import { generateWordSearch } from "../../lib/word-search";
 import { Context, type PageSetup } from "./panes";
 import { TODAY } from "../../lib/date";
+import { cn } from "../../lib/utils";
 dayjs.extend(localizedFormat);
 
 function mmToPx(mm: number, dpi = 100): number {
@@ -102,11 +110,37 @@ export function WordOfTheDayPane(props: Omit<PaneProps, "children">) {
 
 export function XkcdPane(props: Omit<PaneProps, "children">) {
   const query = useXkcdQuery();
+  const [ar, setAr] = useState(1);
+  const isLandscape = ar > 1;
+  const paneHeight = mmToPx(props.pageSetup.paneHeightMm());
+  const paneWidth = mmToPx(props.pageSetup.paneWidthMm());
   return (
-    <Pane {...props}>
-      <div className="h-full w-full flex flex-col bg-white p-4 gap-2 items-center justify-center">
-        <img src={query.data?.img} />
-        <span>{query.data?.title}</span>
+    <Pane {...props} className="bg-white">
+      <div
+        style={
+          isLandscape
+            ? {
+                width: paneHeight,
+                height: paneWidth,
+              }
+            : undefined
+        }
+        className={cn(
+          "pointer-events-none h-full w-full",
+          isLandscape && "-rotate-90 origin-top-left",
+        )}
+      >
+        <img
+          src={query.data?.img}
+          onLoad={(e) => {
+            const img = e.target as HTMLImageElement;
+            setAr(img.naturalWidth / img.naturalHeight);
+          }}
+          className={cn(
+            "h-full w-full object-contain p-3",
+            isLandscape && "-translate-x-full ",
+          )}
+        />
       </div>
     </Pane>
   );
