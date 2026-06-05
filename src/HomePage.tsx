@@ -75,7 +75,11 @@ async function rotate(dataUrl: string, degrees: number): Promise<string> {
   return canvas.toDataURL("image/png");
 }
 
-async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
+async function print(ctx: {
+  divs: HTMLDivElement[];
+  pageSetup: PageSetup;
+  date: Dayjs;
+}) {
   const marginMm = ctx.pageSetup.pageMarginMm();
 
   const pageWidthMm = ctx.pageSetup.pageWidthMm();
@@ -144,7 +148,7 @@ async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
     );
   }
 
-  doc.save(`zine-today-${TODAY_STR}.pdf`);
+  doc.save(`zine-today-${ctx.date.format("yyyy-mm-dd")}.pdf`);
 }
 
 const pageSetup = new UsLetter();
@@ -210,6 +214,7 @@ function ZineSection({ date }: { date: Dayjs }) {
               print({
                 divs: divs,
                 pageSetup,
+                date,
               })
             }
           >
