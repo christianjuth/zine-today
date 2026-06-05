@@ -14,7 +14,7 @@ import {
   WordSearch,
   BookOtdPanel,
 } from "./components/panes/index";
-import { TODAY, TODAY_STR, YESTERDAY } from "./lib/date";
+import { TODAY, YESTERDAY } from "./lib/date";
 import { issueNumber } from "./lib/issue-number";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 dayjs.extend(localizedFormat);
@@ -180,7 +180,7 @@ function ZineSection({ date }: { date: Dayjs }) {
       <BookOtdPanel index={6} pageSetup={pageSetup} key="back" date={date} />,
       <BackPane index={7} pageSetup={pageSetup} key="back" date={date} />,
     ],
-    [pageSetup],
+    [pageSetup, date],
   );
   return (
     <div className="flex flex-row min-h-[100lvh]">
