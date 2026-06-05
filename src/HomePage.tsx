@@ -14,7 +14,7 @@ import {
   WordSearch,
   BookOtdPanel,
 } from "./components/panes/index";
-import { TODAY } from "./lib/date";
+import { TODAY_STR } from "./lib/date";
 import { issueNumber } from "./lib/issue-number";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 dayjs.extend(localizedFormat);
@@ -144,7 +144,7 @@ async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
     );
   }
 
-  doc.save(`zine-today-${TODAY}.pdf`);
+  doc.save(`zine-today-${TODAY_STR}.pdf`);
 }
 
 const pageSetup = new UsLetter();
@@ -174,20 +174,20 @@ export function HomePage() {
     [pageSetup],
   );
   return (
-    <div className="flex flex-row h-[100lvh]">
+    <div className="flex flex-row min-h-[100lvh]">
       <Context.Provider value={{ registerPane }}>
         <div className="flex flex-row flex-wrap gap-y-5 py-5 items-center justify-center bg-neutral-700">
           <div className="flex flex-row flex-wrap gap-y-5 justify-center">
             {panes.map((pane, index) => (
               <Fragment key={index}>
-                {index % 2 === 1 && <div className="w-5" />}
+                {index % 2 === 1 && <div className="w-4" />}
                 {pane}
               </Fragment>
             ))}
           </div>
         </div>
       </Context.Provider>
-      <div className="min-w-120 max-w-120 bg-black text-white p-8 flex flex-col gap-6">
+      <div className="h-[100lvh] min-w-90 max-w-90 bg-black text-white p-6 flex flex-col gap-6 sticky top-0">
         <h1 className="font-black text-xl">Zine.today</h1>
         <h2 className="font-bold">
           {dayjs().format("ddd ll")}, Issue #{issueNumber()}

@@ -106,7 +106,7 @@ const museumSchema = z.object({
   data: z.array(
     z.object({
       title: z.string(),
-      artist_title: z.string(),
+      artist_title: z.string().nullish(),
       image_id: z.string(),
       thumbnail: z.object({ lqip: z.string() }),
       date_display: z.string(),
