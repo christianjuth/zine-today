@@ -16,11 +16,11 @@ import {
   useMuseumQuery,
 } from "../../queries";
 import { ReactQRCode } from "@lglab/react-qr-code";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { generateWordSearch } from "../../lib/word-search";
 import { Context, type PageSetup } from "./panes";
-import { TODAY, TODAY_STR } from "../../lib/date";
+import { TODAY_STR } from "../../lib/date";
 import { cn } from "../../lib/utils";
 import { stabalizeRssItems } from "../../lib/rss";
 dayjs.extend(localizedFormat);
@@ -34,6 +34,7 @@ type PaneProps = {
   pageSetup: PageSetup;
   children: ReactNode;
   className?: string;
+  date: Dayjs;
 };
 
 function Pane(props: PaneProps) {
@@ -65,7 +66,7 @@ function Pane(props: PaneProps) {
 
 export function NasaPane(props: Omit<PaneProps, "children">) {
   const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
-  const items = stabalizeRssItems(feed?.items, TODAY);
+  const items = stabalizeRssItems(feed?.items, props.date);
   return (
     <Pane {...props}>
       <img
@@ -81,7 +82,7 @@ export function NasaPane(props: Omit<PaneProps, "children">) {
 
 export function SudokuPane(props: Omit<PaneProps, "children">) {
   const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
-  const items = stabalizeRssItems(feed?.items, TODAY);
+  const items = stabalizeRssItems(feed?.items, props.date);
   return (
     <Pane {...props}>
       <img
@@ -217,7 +218,7 @@ export function BackPane(props: Omit<PaneProps, "children">) {
 
 export function WordSearch(props: Omit<PaneProps, "children">) {
   const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
-  const items = stabalizeRssItems(feed?.items, TODAY);
+  const items = stabalizeRssItems(feed?.items, props.date);
 
   const nasaImg = items?.[props.index];
   const wordOfTheDayQuery = useWorkOfTheDayQuery();
@@ -227,7 +228,7 @@ export function WordSearch(props: Omit<PaneProps, "children">) {
     [xkcdQuery.data],
   );
 
-  const museumQuery = useMuseumQuery();
+  const museumQuery = useMuseumQuery(props.date);
   const museumWords = useMemo(
     () => museumQuery.data?.data[0].artist_title?.split(" ") ?? [],
     [museumQuery.data],
@@ -281,7 +282,7 @@ export function WordSearch(props: Omit<PaneProps, "children">) {
 }
 
 export function BookOtdPanel(props: Omit<PaneProps, "children">) {
-  const query = useMuseumQuery();
+  const query = useMuseumQuery(props.date);
   const item = query.data?.data[0];
   const imgSrc = `${query.data?.config.iiif_url}/${item?.image_id}/full/400,/0/default.jpg`;
   return (

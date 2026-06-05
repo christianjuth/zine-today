@@ -14,11 +14,11 @@ import {
   WordSearch,
   BookOtdPanel,
 } from "./components/panes/index";
-import { TODAY_STR } from "./lib/date";
+import { TODAY, TODAY_STR, YESTERDAY } from "./lib/date";
 import { issueNumber } from "./lib/issue-number";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 dayjs.extend(localizedFormat);
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 function mmToPx(mm: number, dpi = 100): number {
   return Math.round((mm / 25.4) * dpi);
@@ -149,7 +149,7 @@ async function print(ctx: { divs: HTMLDivElement[]; pageSetup: PageSetup }) {
 
 const pageSetup = new UsLetter();
 
-export function HomePage() {
+function ZineSection({ date }: { date: Dayjs }) {
   const [divs, setDivs] = useState<HTMLDivElement[]>([]);
   const registerPane = useCallback(
     (index: number, pane: HTMLDivElement) =>
@@ -162,21 +162,26 @@ export function HomePage() {
   );
   const panes = useMemo(
     () => [
-      <NasaPane index={0} pageSetup={pageSetup} key="nasa" />,
-      <SudokuPane index={1} pageSetup={pageSetup} key="sudoku-1" />,
-      <WordOfTheDayPane index={2} pageSetup={pageSetup} key="word" />,
-      <SudokuPane index={3} pageSetup={pageSetup} key="sudoku-2" />,
-      <XkcdPane index={4} pageSetup={pageSetup} key="word" />,
-      <WordSearch index={5} pageSetup={pageSetup} key="sudoku-2" />,
-      <BookOtdPanel index={6} pageSetup={pageSetup} key="back" />,
-      <BackPane index={7} pageSetup={pageSetup} key="back" />,
+      <NasaPane index={0} pageSetup={pageSetup} key="nasa" date={date} />,
+      <SudokuPane index={1} pageSetup={pageSetup} key="sudoku-1" date={date} />,
+      <WordOfTheDayPane
+        index={2}
+        pageSetup={pageSetup}
+        key="word"
+        date={date}
+      />,
+      <SudokuPane index={3} pageSetup={pageSetup} key="sudoku-2" date={date} />,
+      <XkcdPane index={4} pageSetup={pageSetup} key="word" date={date} />,
+      <WordSearch index={5} pageSetup={pageSetup} key="sudoku-2" date={date} />,
+      <BookOtdPanel index={6} pageSetup={pageSetup} key="back" date={date} />,
+      <BackPane index={7} pageSetup={pageSetup} key="back" date={date} />,
     ],
     [pageSetup],
   );
   return (
     <div className="flex flex-row min-h-[100lvh]">
       <Context.Provider value={{ registerPane }}>
-        <div className="flex flex-row flex-wrap gap-y-5 py-5 items-center justify-center bg-neutral-700">
+        <div className="flex flex-row flex-wrap gap-y-5 py-5 items-center justify-center bg-neutral-800">
           <div className="flex flex-row flex-wrap gap-y-5 justify-center">
             {panes.map((pane, index) => (
               <Fragment key={index}>
@@ -187,29 +192,45 @@ export function HomePage() {
           </div>
         </div>
       </Context.Provider>
-      <div className="h-[100lvh] min-w-90 max-w-90 bg-black text-white p-6 flex flex-col gap-6 sticky top-0">
-        <h1 className="font-black text-xl">Zine.today</h1>
-        <h2 className="font-bold">
-          {dayjs().format("ddd ll")}, Issue #{issueNumber()}
-        </h2>
-        <h2>Step 1. Print</h2>
-        <button
-          className="bg-white text-black px-1"
-          onClick={() =>
-            print({
-              divs: divs,
-              pageSetup,
-            })
-          }
-        >
-          Print
-        </button>
-        <h2>Step 2. Fold</h2>
-        <iframe
-          src="https://www.youtube.com/embed/o20s2JNyBtI"
-          className="w-full aspect-video"
-        />
+      <div className="h-[100lvh] min-w-90 max-w-90 bg-black text-white">
+        <div className="sticky top-0 p-6 flex flex-col gap-6">
+          {date.isSame(TODAY, "date") && (
+            <h1 className="font-black text-xl">Zine.today</h1>
+          )}
+          {date.isSame(YESTERDAY, "date") && (
+            <h1 className="font-black text-xl">Zine Yesterday</h1>
+          )}
+          <h2 className="font-bold">
+            {date.format("ddd ll")}, Issue #{issueNumber(date)}
+          </h2>
+          <h2>Step 1. Print</h2>
+          <button
+            className="bg-white text-black px-1"
+            onClick={() =>
+              print({
+                divs: divs,
+                pageSetup,
+              })
+            }
+          >
+            Print
+          </button>
+          <h2>Step 2. Fold</h2>
+          <iframe
+            src="https://www.youtube.com/embed/o20s2JNyBtI"
+            className="w-full aspect-video"
+          />
+        </div>
       </div>
     </div>
+  );
+}
+
+export function HomePage() {
+  return (
+    <>
+      <ZineSection date={TODAY} />
+      <ZineSection date={TODAY.subtract(1, "day")} />
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { useMemo } from "react";
 // import { Dayjs } from "dayjs";
 import z from "zod";
 import { issueNumber } from "../lib/issue-number";
+import type { Dayjs } from "dayjs";
 
 async function textFetch(input: RequestInfo | URL, init: RequestInit) {
   const res = await fetch(input, init);
@@ -117,7 +118,7 @@ const museumSchema = z.object({
   }),
 });
 
-export function useMuseumQuery() {
+export function useMuseumQuery(date: Dayjs) {
   const params = {
     query: {
       bool: {
@@ -128,7 +129,7 @@ export function useMuseumQuery() {
       },
     },
     sort: [{ id: { order: "asc" } }],
-    from: issueNumber(),
+    from: issueNumber(date),
     size: 1,
     fields: [
       "id",
