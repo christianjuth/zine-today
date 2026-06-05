@@ -90,8 +90,8 @@ export function SudokuPane(props: Omit<PaneProps, "children">) {
         src={items?.[props.index].enclosures?.[0].url}
       />
       <div className="h-full w-full flex flex-col gap-1 items-center justify-center relative">
-        <Sudoku offset={props.index + 0.1} />
-        <Sudoku offset={props.index + 0.2} />
+        <Sudoku date={props.date} salt={props.index + 0.1} />
+        <Sudoku date={props.date} salt={props.index + 0.2} />
       </div>
     </Pane>
   );

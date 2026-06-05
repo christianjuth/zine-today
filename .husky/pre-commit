@@ -1,0 +1,3 @@
+pnpm test:ts
+pnpm lint
+pnpm lint-staged
