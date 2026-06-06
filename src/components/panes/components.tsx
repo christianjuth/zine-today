@@ -37,6 +37,10 @@ type PaneProps = {
   date: Dayjs;
 };
 
+const RSS_FEEDS = {
+  NASA: "https://www.nasa.gov/feeds/iotd-feed/",
+};
+
 function Pane(props: PaneProps) {
   const { pageSetup } = props;
   const ref = useRef<HTMLDivElement>(null);
@@ -65,7 +69,7 @@ function Pane(props: PaneProps) {
 }
 
 export function NasaPane(props: Omit<PaneProps, "children">) {
-  const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
+  const [feed] = useRssFeed(RSS_FEEDS.NASA);
   const items = stabalizeRssItems(feed?.items, props.date);
   return (
     <Pane {...props}>
@@ -81,7 +85,7 @@ export function NasaPane(props: Omit<PaneProps, "children">) {
 }
 
 export function SudokuPane(props: Omit<PaneProps, "children">) {
-  const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
+  const [feed] = useRssFeed(RSS_FEEDS.NASA);
   const items = stabalizeRssItems(feed?.items, props.date);
   return (
     <Pane {...props}>
@@ -185,20 +189,18 @@ export function QuotePane(props: Omit<PaneProps, "children">) {
 }
 
 export function BackPane(props: Omit<PaneProps, "children">) {
-  const query = useQuoteQuery();
-  const quote = query.data?.data[0];
+  const [feed] = useRssFeed(RSS_FEEDS.NASA);
+  const items = stabalizeRssItems(feed?.items, props.date);
+  const item = items?.[0];
   return (
     <Pane {...props}>
-      <div className="bg-gray-950 h-full p-5.5 text-white flex flex-col items-end justify-between">
-        <blockquote className="flex flex-col gap-2">
-          <p className="text-sm italic text-gray-200">{quote?.quote}</p>
+      <div className="bg-gray-950 h-full p-5.5 text-white flex flex-col gap-4">
+        <span>About the cover photo</span>
+        <p className="text-sm italic">{item?.description}</p>
 
-          <span className="text-base font-semibold text-gray-400">
-            ~ {quote?.author}
-          </span>
-        </blockquote>
+        <div className="flex-1" />
 
-        <div>
+        <div className="self-end">
           <span className="font-bold mb-1 block text-end text-gray-400">
             Solutions
           </span>
@@ -217,7 +219,7 @@ export function BackPane(props: Omit<PaneProps, "children">) {
 }
 
 export function WordSearch(props: Omit<PaneProps, "children">) {
-  const [feed] = useRssFeed("https://www.nasa.gov/feeds/iotd-feed/");
+  const [feed] = useRssFeed(RSS_FEEDS.NASA);
   const items = stabalizeRssItems(feed?.items, props.date);
 
   const nasaImg = items?.[props.index];
@@ -281,7 +283,7 @@ export function WordSearch(props: Omit<PaneProps, "children">) {
   );
 }
 
-export function BookOtdPanel(props: Omit<PaneProps, "children">) {
+export function MuseumPanel(props: Omit<PaneProps, "children">) {
   const query = useMuseumQuery(props.date);
   const item = query.data?.data[0];
   const imgSrc = `${query.data?.config.iiif_url}/${item?.image_id}/full/400,/0/default.jpg`;

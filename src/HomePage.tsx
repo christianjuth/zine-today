@@ -12,7 +12,7 @@ import {
   XkcdPane,
   BackPane,
   WordSearch,
-  BookOtdPanel,
+  MuseumPanel,
 } from "./components/panes/index";
 import { TODAY, YESTERDAY } from "./lib/date";
 import { issueNumber } from "./lib/issue-number";
@@ -177,7 +177,7 @@ function ZineSection({ date }: { date: Dayjs }) {
       <SudokuPane index={3} pageSetup={pageSetup} key="sudoku-2" date={date} />,
       <XkcdPane index={4} pageSetup={pageSetup} key="word" date={date} />,
       <WordSearch index={5} pageSetup={pageSetup} key="sudoku-2" date={date} />,
-      <BookOtdPanel index={6} pageSetup={pageSetup} key="back" date={date} />,
+      <MuseumPanel index={6} pageSetup={pageSetup} key="back" date={date} />,
       <BackPane index={7} pageSetup={pageSetup} key="back" date={date} />,
     ],
     [pageSetup, date],
